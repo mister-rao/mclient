@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:mclient/chat/channel/channel_bloc.dart';
-import 'package:mclient/src/ws_requests.dart';
-import 'package:mclient/src/ws_responses.dart';
+import 'package:mclient/models/ws_requests_model.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../ws_get_it.dart';
+import '../chat/ws_get_it.dart';
 
 class ChannelDriver {
   set connected(value) => _connected = value;
@@ -15,7 +12,9 @@ class ChannelDriver {
   bool _connected = false;
   final WebSocketChannel channel;
 
-
+  String? _myId;
+  String? get myId => _myId;
+  set myId(String? value) => _myId = value;
 
   ChannelDriver({required this.channel});
 
@@ -49,7 +48,7 @@ class ChannelDriver {
   Future<void> sendmsg(String sendmsg, String id) async {
     if (_connected == true) {
       String msg = jsonEncode(SendMessageToRoomRequest(
-              roomId: "!UPZfqhWWOSbluGRasc:matrix.glitchh.in", message: sendmsg)
+              roomId: "!WljKAGYTcXiaLcpyGv:matrix.glitchh.in", message: sendmsg)
           .toJson());
 
       channel.sink.add(msg); //send message to reciever channel

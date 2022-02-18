@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ws_requests.dart';
+part of '../models/ws_requests_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ws_responses.dart';
+part of '../models/ws_responses_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
