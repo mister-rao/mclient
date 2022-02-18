@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'ws_requests.g.dart';
+part 'ws_requests_model.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class MatrixLoginRequest{ //message data model

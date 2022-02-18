@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
-import 'package:mclient/chat/matrix_ws_sdk/channel_functions.dart';
-import 'package:mclient/src/ws_requests.dart';
-import 'package:mclient/src/ws_responses.dart';
+import 'package:mclient/utilities/channel_functions.dart';
+import 'package:mclient/models/ws_requests_model.dart';
+import 'package:mclient/models/ws_responses_model.dart';
 import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -25,7 +25,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
 
 
-    driver = getIt<ChannelDriver>();
+    // driver = getIt<ChannelDriver>();
 
     on<ChannelEvent>((event, emit) {
       print("ChannelBloc.bloc event>>: $event");
@@ -34,7 +34,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       All request events to websocket server defined below
        */
       if (event is MatrixLoginInEvent) {
-        driver.loginToMatrix(event.loginRequest);
+        // driver.loginToMatrix(event.loginRequest);
       }
       if (event is LoggedInMatrixUserEvent) {
         getIt<G>().loggedInUser = event.user;
@@ -55,10 +55,10 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
 
   }
-  ChannelDriver driver = getIt<ChannelDriver>();
+  // ChannelDriver driver = getIt<ChannelDriver>();
 
   void dispose() {
-    driver.channel.sink.close();
+    // driver.channel.sink.close();
   }
 
 

@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-part 'ws_responses.g.dart';
+part 'ws_responses_model.g.dart';
 
 
 class MatrixUser {
