@@ -1,5 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:mclient/chat/Global.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../utilities/channel_functions.dart';
@@ -16,6 +15,4 @@ Future<void> init() async {
   getIt.registerSingleton<ChannelDriver>(
       ChannelDriver(channel: getIt<WebSocketChannel>()),
       signalsReady: true);
-
-  getIt.registerSingleton<G>(G(), signalsReady: true);
 }

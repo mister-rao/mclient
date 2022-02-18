@@ -80,7 +80,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState>{
       driver!.syncChatApp();
       var message = MessageModel(
           msgText: "Login Success ${matrixUser.matrixUserId}", userId: matrixUser.matrixUserId,
-          isMe: true);
+          isMe: true,
+          eventType: 'response.jwt_login',
+          myId: driver!.myId
+      );
       controller.sink.add(message);
 
     } else if (payload['message']['type'] == "event.message_received") {

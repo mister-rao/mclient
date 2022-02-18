@@ -6,15 +6,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mclient/bloc/chat/chat_bloc.dart';
-import 'package:mclient/chat/channel/channel_bloc.dart';
 import 'package:mclient/models/message_model.dart';
-import 'package:mclient/utilities/channel_functions.dart';
-import 'package:mclient/chat/ws_get_it.dart';
 import 'package:mclient/models/ws_requests_model.dart';
 import 'package:mclient/models/ws_responses_model.dart';
 import 'package:provider/provider.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
@@ -33,7 +28,6 @@ class ChatPageState extends State<ChatPage> {
   late bool connected; // boolean value to track connection status
 
   String myId = "222"; //my id
-  String receiverId = "111"; //receiver id
   // swap myid and recieverid value on another mobile to test send and receive
 
   String auth = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ1MjY3MDkwLCJpYXQiOjE2NDUxODA2OTAsImp0aSI6IjMxY2ZhNzdlMzRkZTQ5NTk5Y2UwNWE0OGExOTkyYzU2IiwidXNlcl9pZCI6MiwibWF0cml4X3VzZXJuYW1lIjoidGFwYXN3aV8yMDA4In0.aczmVCX-GgVqZO5_6B_DOd2cPw30cIEnAv6HgscUZbY';
@@ -47,97 +41,7 @@ class ChatPageState extends State<ChatPage> {
   void initState() {
     context.read<ChatBloc>().add(ConnectWebSocketEvent());
     connected = false;
-    msgText.text = "";
-    // channelConnect(context);
     super.initState();
-  }
-
-  void mapWebSocketEventsToState(BuildContext context, dynamic payload) {
-    if (payload['message']['type'] == "websocket.accept") {
-      // driver.connected = true;
-      print("Connection established.");
-    } else if (payload['message']['type'] == "response.jwt_login") {
-      print("Login Response");
-      Map data = payload['message'];
-      MatrixLoginResponse matrixUser = MatrixLoginResponse(
-          matrixUserId: data['matrix_user_id'],
-          deviceId: data['device_id'],
-          matrixToken: data['matrix_token']);
-      print("user logged in ${matrixUser.matrixUserId}");
-      // Provider.of<ChannelBloc>(context, listen: false)
-      //     .add(LoggedInMatrixUserEvent(user: matrixUser));
-      myId = matrixUser.matrixUserId;
-      /*setState(() {
-        msgText.text = "";
-        msgList.add(MessageData(
-            msgtext: "Login Success ${matrixUser.matrixUserId}", userid: "111", isme: false));
-      });*/
-      // driver.syncChatApp();
-      /*setState(() {
-        msgText.text = "";
-        msgList.add(MessageData(msgtext: "sync started!!", userid: "111", isme: false));
-      });*/
-    } else if (payload['message']['type'] == "event.message_received") {
-      print("Message Recieved");
-      Map data = payload['message'];
-      MessageReceivedEvent message = MessageReceivedEvent(
-          sender: data['sender'],
-          body: data['body'],
-          roomId: data['room_id'],
-          roomName: data['room_name'],
-          senderId: data['sender_id']);
-      String event = "message received>> sender: ${message.sender} message: ${message.body}";
-      print(event);
-      /*setState(() {
-        msgText.text = "";
-        msgList.add(MessageData(msgtext: event, userid: "111", isme: false));
-      });*/
-    } else if (payload['message']['type'] == "response.get_profile") {
-      print("Get profile Response");
-      Map data = payload['message'];
-      MatrixGetProfileResponse matrixUserProfile = MatrixGetProfileResponse(
-          displayName: data['display_name'], avatarUrl: data['avatar_url']);
-      /*setState(() {
-        msgText.text = "";
-        msgList.add(MessageData(
-            msgtext: "User Profile: ${matrixUserProfile.displayName}", userid: "111", isme: false));
-      });*/
-      print("Matrix User Profile: ${matrixUserProfile.displayName}");
-    } else if (payload['message']['type'] == "response.joined_rooms") {
-      print("Get user joined rooms");
-      Map data = payload['message'];
-      MatrixGetJoinedRoomsResponse matrixUserRoms =
-          MatrixGetJoinedRoomsResponse(rooms: data['rooms']);
-      /*setState(() {
-        msgText.text = "";
-        msgList.add(MessageData(
-            msgtext: "User Joined Rooms: ${matrixUserRoms.rooms}", userid: "111", isme: false));
-      });*/
-      print("User Joined room: ${matrixUserRoms.rooms}");
-    }
-  }
-
-  channelConnect(BuildContext context) {
-    //function to connect
-    try {
-      /*driver.channel.stream.listen(
-        (payload) {
-          payload = jsonDecode(payload);
-          print("Main.channelconnect: ws_stream_data>> $payload");
-          mapWebSocketEventsToState(context, payload);
-        },
-        onDone: () {
-          //if WebSocket is disconnected
-          print("Web socket is closed");
-        },
-        onError: (error) {
-          print(error.toString());
-        },
-      );*/
-    } catch (_) {
-      print(_);
-      print("error on connecting to websocket.");
-    }
   }
 
   @override
@@ -158,17 +62,6 @@ class ChatPageState extends State<ChatPage> {
                 final loginRequest = MatrixLoginRequest(token: auth);
                 BlocProvider.of<ChatBloc>(context).add(
                     LoginEvent(request: loginRequest));
-                /*final loginRequest = MatrixLoginRequest(token: auth);
-                driver.loginToMatrix(loginRequest);
-
-                // Provider.of<ChannelBloc>(context, listen: false).add(
-                //   MatrixLoginInEvent(loginRequest: loginRequest),
-                // );
-                setState(() {
-                  msgText.text = "";
-                  msgList.add(
-                      MessageData(msgtext: "Logging in to Matrix", userid: "111", isme: false));
-                });*/
               },
             )
           ],
@@ -190,9 +83,15 @@ class ChatPageState extends State<ChatPage> {
                           return StreamBuilder<MessageModel>(
                               stream: state.messageStream,
                               builder: (context, snapshot){
-                                print('Snameshot DATA: ');
-                                print('${snapshot.data!.toJson().toString()}\n');
                                 if (snapshot.connectionState == ConnectionState.active) {
+                                  if(snapshot.data!.eventType == 'response.jwt_login'){
+                                    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                                      setState((){
+                                        myId = snapshot.data!.myId!;
+                                        connected = true;
+                                      });
+                                    });
+                                  }
                                   msgList.add(snapshot.data!);
                                   return SingleChildScrollView(
                                     child: Column(
