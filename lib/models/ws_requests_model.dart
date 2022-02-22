@@ -31,6 +31,20 @@ class SyncChatServerRequest{ //message data model
 
 
 @JsonSerializable(fieldRename: FieldRename.snake)
+class CreateRoomRequest{ //message data model
+  final String eventType = "create_dm_room";
+  final List<String> inviteId;
+  final String roomName;
+
+
+  CreateRoomRequest({required this.inviteId, required this.roomName});
+
+  Map<String, dynamic> toJson() => _$CreateRoomRequestToJson(this);
+
+}
+
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class SendMessageToRoomRequest {
   String eventType = "send_message";
   String messageType = "m.room.message";

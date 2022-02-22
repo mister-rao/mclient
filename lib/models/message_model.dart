@@ -1,3 +1,5 @@
+
+
 class MessageModel {
   //message data model
   String msgText;
@@ -11,4 +13,11 @@ class MessageModel {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'text': msgText,
   };
+}
+
+class RoomsModel extends MessageModel{
+  List<dynamic> rooms;
+  RoomsModel({required this.rooms, required msgText, required userId, required isMe, required eventType, required myId})
+      : super(msgText: msgText, isMe: isMe, eventType: eventType, myId: myId, userId: userId);
+
 }

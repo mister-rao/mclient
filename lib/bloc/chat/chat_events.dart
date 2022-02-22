@@ -18,6 +18,21 @@ class ConnectWebSocketEvent extends ChatEvent{
   int get hashCode => super.hashCode;
 }
 
+class CreateRoomEvent extends ChatEvent{
+  final String inviteId;
+  final String roomName;
+  CreateRoomEvent({required this.inviteId, required this.roomName});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => super.hashCode;
+}
+
 class LoginEvent extends ChatEvent{
   final MatrixLoginRequest request;
   LoginEvent({required this.request});
@@ -47,8 +62,7 @@ class SyncEvent extends ChatEvent{
 }
 
 class GetRoomsEvent extends ChatEvent{
-  final GetRoomsRequest request;
-  GetRoomsEvent({required this.request});
+  GetRoomsEvent();
 
   @override
   List<Object> get props => [];
