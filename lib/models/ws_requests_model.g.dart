@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of '../models/ws_requests_model.dart';
+part of 'ws_requests_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -33,6 +33,20 @@ Map<String, dynamic> _$SyncChatServerRequestToJson(
         SyncChatServerRequest instance) =>
     <String, dynamic>{
       'event_type': instance.eventType,
+    };
+
+CreateRoomRequest _$CreateRoomRequestFromJson(Map<String, dynamic> json) =>
+    CreateRoomRequest(
+      inviteId:
+          (json['invite_id'] as List<dynamic>).map((e) => e as String).toList(),
+      roomName: json['room_name'] as String,
+    );
+
+Map<String, dynamic> _$CreateRoomRequestToJson(CreateRoomRequest instance) =>
+    <String, dynamic>{
+      'event_type': instance.eventType,
+      'invite': instance.inviteId,
+      'room_name': instance.roomName,
     };
 
 SendMessageToRoomRequest _$SendMessageToRoomRequestFromJson(

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of '../models/ws_responses_model.dart';
+part of 'ws_responses_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -11,7 +11,7 @@ MatrixLoginResponse _$MatrixLoginResponseFromJson(Map<String, dynamic> json) =>
       matrixToken: json['matrix_token'] as String,
       deviceId: json['device_id'] as String,
       matrixUserId: json['matrix_user_id'] as String,
-    );
+    )..error = json['error'] as String?;
 
 Map<String, dynamic> _$MatrixLoginResponseToJson(
         MatrixLoginResponse instance) =>
@@ -39,7 +39,7 @@ Map<String, dynamic> _$MatrixGetProfileResponseToJson(
 MatrixGetJoinedRoomsResponse _$MatrixGetJoinedRoomsResponseFromJson(
         Map<String, dynamic> json) =>
     MatrixGetJoinedRoomsResponse(
-      rooms: json['rooms'] as List<dynamic>,
+      rooms: json['rooms'] as List<String>,
     );
 
 Map<String, dynamic> _$MatrixGetJoinedRoomsResponseToJson(

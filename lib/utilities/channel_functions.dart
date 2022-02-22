@@ -56,4 +56,14 @@ class ChannelDriver {
       print("Websocket is not connected.");
     }
   }
+
+  Future<void> createRoom(String inviteId, String roomName) async {
+    if (_connected == true) {
+      String msg = jsonEncode(CreateRoomRequest(inviteId: [inviteId], roomName: roomName).toJson());
+
+      channel.sink.add(msg); //send message to reciever channel
+    } else {
+      print("Websocket is not connected.");
+    }
+  }
 }

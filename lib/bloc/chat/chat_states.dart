@@ -21,6 +21,33 @@ class WebSocketConnectedState extends ChatState{
   int get hashCode => super.hashCode;
 }
 
+class InviteSentState extends ChatState{
+  InviteSentState();
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => super.hashCode;
+}
+
+class RoomsLoadedState extends ChatState{
+  final Stream<MessageModel> messageStream;
+  RoomsLoadedState({required this.messageStream});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  bool operator ==(Object other) => false;
+
+  @override
+  int get hashCode => super.hashCode;
+}
+
 class WebSocketDisconnectedState extends ChatState{
   WebSocketDisconnectedState();
 

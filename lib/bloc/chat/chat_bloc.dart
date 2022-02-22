@@ -18,33 +18,35 @@ class ChatBloc extends Bloc<ChatEvent, ChatState>{
   StreamController<MessageModel>? controller;
   ChannelDriver? driver;
   ChatBloc() : super(ChatInitialState()){
-    controller = StreamController<MessageModel>();
+    controller = StreamController.broadcast();
 
-    on<ConnectWebSocketEvent>((event, emit) async{
-      await _connectToWebSocket();
-      emit(WebSocketConnectedState(messageStream: controller!.stream));
-    });
-
-    on<LoginEvent>((event, emit) {
-      if(driver!.connected) {
-        print('From Login Event ===> ');
-        driver!.loginToMatrix(event.request);
+    on<ChatEvent>((event, emit) async{
+      if(event is ConnectWebSocketEvent){
+        await _connectToWebSocket();
+        emit(WebSocketConnectedState(messageStream: controller!.stream));
+      }else if(event is LoginEvent){
+        if(driver!.connected) {
+          print('From Login Event ===> ');
+          driver!.loginToMatrix(event.request);
+        }
+      } else if(event is SyncEvent){
+        if(driver!.connected)
+          driver!.syncChatApp();
+      } else if(event is SendMessageEvent){
+        if(driver!.connected)
+          driver!.sendmsg(event.message, '');
+      }else if(event is CreateRoomEvent){
+        if(driver!.connected) {
+          driver!.createRoom(event.inviteId, event.roomName);
+          emit(InviteSentState());
+        }
+      }else if(event is GetRoomsEvent){
+        if(driver!.connected) {
+          driver!.getRooms();
+          emit(RoomsLoadedState(messageStream: controller!.stream));
+        }
       }
     });
-    on<SyncEvent>((event, emit) {
-      if(driver!.connected)
-        driver!.syncChatApp();
-    });
-    on<SendMessageEvent>((event, emit) {
-      if(driver!.connected)
-        driver!.sendmsg(event.message, '');
-    });
-  }
-
-  _listener<T>(payload){
-    var message = jsonDecode(payload);
-    if(message['message'] != null)
-      mapWebSocketEventsToState(payload: jsonDecode(payload), controller: controller!);
   }
 
   Future<void> _connectToWebSocket() async{
@@ -54,15 +56,23 @@ class ChatBloc extends Bloc<ChatEvent, ChatState>{
     driver = ChannelDriver(channel: channel);
     getIt.registerSingleton<ChannelDriver>(driver!, signalsReady: true);
 
-    driver!.channel.stream.listen(_listener);
+    driver!.channel.stream.listen((payload){
+      var message = jsonDecode(payload);
+      if(message['message'] != null)
+        mapWebSocketEventsToState(
+            payload: jsonDecode(payload),
+            controller: controller!,
+        );
+    });
   }
 
   void mapWebSocketEventsToState({required dynamic payload,
-    required StreamController<MessageModel> controller}) {
+    required StreamController<MessageModel> controller,}) {
     if (payload['message']['type'] == "websocket.accept") {
       driver!.connected = true;
       var message = MessageModel(
           msgText: "Web Socket Connected...",
+          eventType: 'websocket.accept',
           isMe: true);
       controller.sink.add(message);
       // print('\n===== Web Socket Connected =====\n');
@@ -102,6 +112,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState>{
       var message = MessageModel(
           msgText: event,
           userId: messageEvent.senderId,
+          eventType: 'event.message_received',
           isMe: (driver!.myId == messageEvent.senderId));
 
       controller.sink.add(message);
@@ -115,7 +126,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState>{
       Map data = payload['message'];
       MatrixGetJoinedRoomsResponse matrixUserRoms =
       MatrixGetJoinedRoomsResponse(rooms: data['rooms']);
-
+      print('Rooms ==> ${matrixUserRoms.rooms}');
+      controller.sink.add(RoomsModel(
+          eventType: 'response.joined_rooms',
+          msgText: '',
+          isMe: true,
+          myId: '',
+          rooms: matrixUserRoms.rooms, userId: ''));
     }
   }
 }

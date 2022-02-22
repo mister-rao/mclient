@@ -9,6 +9,8 @@ import 'package:mclient/bloc/chat/chat_bloc.dart';
 import 'package:mclient/models/message_model.dart';
 import 'package:mclient/models/ws_requests_model.dart';
 import 'package:mclient/models/ws_responses_model.dart';
+import 'package:mclient/screens/my_rooms.dart';
+import 'package:mclient/screens/send_invite.dart';
 import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -30,7 +32,7 @@ class ChatPageState extends State<ChatPage> {
   String myId = "222"; //my id
   // swap myid and recieverid value on another mobile to test send and receive
 
-  String auth = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ1MjY3MDkwLCJpYXQiOjE2NDUxODA2OTAsImp0aSI6IjMxY2ZhNzdlMzRkZTQ5NTk5Y2UwNWE0OGExOTkyYzU2IiwidXNlcl9pZCI6MiwibWF0cml4X3VzZXJuYW1lIjoidGFwYXN3aV8yMDA4In0.aczmVCX-GgVqZO5_6B_DOd2cPw30cIEnAv6HgscUZbY';
+  String auth = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ1NTMxOTA2LCJpYXQiOjE2NDU0NDU1MDYsImp0aSI6IjBkOGNkOTkwNTg3NTQ1Nzc5ZjM5NTk1ZGVhZGY1MjA0IiwidXNlcl9pZCI6MiwibWF0cml4X3VzZXJuYW1lIjoidGFwYXN3aV8yMDA4In0.MXCCJbVSFIyZC2PMnI02JwBVifF2D5YflUAJ4ANgv5I';
 
   List<MessageModel> msgList = [];
 
@@ -55,7 +57,7 @@ class ChatPageState extends State<ChatPage> {
           actions: <Widget>[
             IconButton(
               icon: const Icon(
-                Icons.settings,
+                Icons.login,
                 color: Colors.white,
               ),
               onPressed: () {
@@ -63,7 +65,34 @@ class ChatPageState extends State<ChatPage> {
                 BlocProvider.of<ChatBloc>(context).add(
                     LoginEvent(request: loginRequest));
               },
-            )
+            ),
+            if(connected)
+              IconButton(
+              icon: const Icon(
+                Icons.people,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(context).pushNamed(MyRooms.ROUTE);
+              },
+            ),
+            if(connected)
+              IconButton(
+              icon: const Icon(
+                Icons.create_new_folder_sharp,
+                color: Colors.white,
+              ),
+              onPressed: () async{
+                List? list = await Navigator.of(context).push<List<String>>(
+                    MaterialPageRoute(builder: (context) => SendInvite(), fullscreenDialog: true));
+                if(list != null){
+                  String inviteId = list[0];
+                  String roomName = list[1];
+                  BlocProvider.of<ChatBloc>(context).add(
+                      CreateRoomEvent(inviteId: inviteId, roomName: roomName));
+                }
+              },
+            ),
           ],
         ),
         body: Stack(
@@ -77,7 +106,16 @@ class ChatPageState extends State<ChatPage> {
                 child: Container(
                     padding: const EdgeInsets.all(15),
                     child:
-                  BlocBuilder<ChatBloc, ChatState>(
+                  BlocConsumer<ChatBloc, ChatState>(
+                      listener: (context, state){
+                        if(state is InviteSentState){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Invite Sent...')));
+                        }
+                      },
+                      buildWhen: (previous, next){
+                        return (next is WebSocketConnectedState);
+                      },
                       builder: (context, state){
                         if(state is WebSocketConnectedState){
                           return StreamBuilder<MessageModel>(
@@ -91,8 +129,11 @@ class ChatPageState extends State<ChatPage> {
                                         connected = true;
                                       });
                                     });
+                                  }else if(snapshot.data!.eventType == 'event.message_received' ||
+                                      snapshot.data!.eventType == 'websocket.accept' ||
+                                      snapshot.data!.eventType == 'response.jwt_login'){
+                                    msgList.add(snapshot.data!);
                                   }
-                                  msgList.add(snapshot.data!);
                                   return SingleChildScrollView(
                                     child: Column(
                                       children: msgList.map((msg) => Container(
